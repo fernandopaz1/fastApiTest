@@ -5,11 +5,13 @@ from typing import Optional #para parametros opcionales
 app = FastAPI()
 
 @app.get("/")     # dirección base / me devuelve el json en formato string
-def read_root():
+async def read_root():
     return {"Hello": "World"}
 
+# si hay uno con path /items/hola o algo asi evalua siempre el que tiene path por parametro
+# por lo que hay que poner el de path fijo antes
 @app.get("/items/{item_id}")   # como le paso el parametro opcional? /items/10?q=Mi%20Parametro%20Opcional
-def read_item(item_id: int, q: Optional[str] = None):
+async def read_item(item_id: int, q: Optional[str] = None):
     return {"item_id": item_id, "q": q}
 
 # montamos el servidor con uvicorn main:app --reload
