@@ -58,3 +58,28 @@ async def read_item(item_id: str, q: Optional[str] = None, short: bool = False):
 
 # como bool se convierte automaticamente a boolean entnces en la url puedo
 # porner short=true, 1, True, on, yes y lo toma como true
+
+@app.get("/users/{user_id}/items/{item_id}")
+async def read_user_item(user_id: int, item_id: str, q: Optional[str] = None, short: bool = False):
+    item = {"item_id": item_id, "owner_id": user_id}
+    if q:
+        item.update({"q": q})
+    if not short:
+        item.update(
+            {"description": "This is an amazing item that has a long description"}
+        )
+    return item
+
+# ejemplo de url con multiples parametros
+# http://127.0.0.1:8000/users/1/items/2
+
+
+@app.get("/items/needyGet/{item_id}")
+async def read_user_item(item_id: str, needy: str):
+    item = {"item_id": item_id, "needy": needy}
+    return item
+
+# Ejemplo de parametros requeridos, si no hay paramet
+# http://127.0.0.1:8000/items/needyGet/1  asi como esta tira error
+# http://127.0.0.1:8000/items/needyGet/1?needy=1 Esta es la froma correcta de hacer un get con 
+# parametros necesarios
