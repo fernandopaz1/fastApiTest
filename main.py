@@ -30,3 +30,15 @@ class Item(BaseModel):
 @app.put("/items/{item_id}")
 def update_item(item_id: int, item: Item):
     return {"item_name": item.name, "item_id": item_id}
+
+
+
+fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
+
+@app.get("/items/")
+async def read_item(skip: int = 0, limit: int = 10):
+    return fake_items_db[skip : skip + limit]
+
+# Para pasarle parametros a la función hay que pasarselos en la url despues del ?
+# los parametros van separados por &
+# url?param1=valor1&param2=valor2
