@@ -22,7 +22,7 @@ class Item(BaseModel):
     name: str
     price: float
     is_offer: Optional[bool] = None
-
+    tax: Optional[float] = None
 
 # update item debe recibir el numero que se lo paso por la url
 # y un objeto tipo Item que me lo pasan por el body
@@ -83,3 +83,27 @@ async def read_user_item(item_id: str, needy: str):
 # http://127.0.0.1:8000/items/needyGet/1  asi como esta tira error
 # http://127.0.0.1:8000/items/needyGet/1?needy=1 Esta es la froma correcta de hacer un get con 
 # parametros necesarios
+
+
+@app.post("/items/posted/")
+async def create_item(item: Item):
+    item_dict = item.dict()
+    if item.tax:
+        price_with_tax = item.price + item.tax
+        item_dict.update({"price_with_tax": price_with_tax})
+    return item_dict
+# Aca estamos procesando los datos pasados por el body de
+# y los retornamos con modificaciones
+
+@app.put("/items/{item_id}")
+async def create_item(item_id: int, item: Item):
+    return {"item_id": item_id, **item.dict()}
+# aca usamos put porque put es un metodo para poner elementos
+# en la url, si se quiere hacer algo mas general se debe usar post
+
+
+@app.put("/items/posted/{item_id}")
+async def create_item(item_id: int, item: Item):
+    return {"item_id": item_id, **item.dict()}
+
+
