@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path
 from pydantic import BaseModel
 from typing import Optional, List #para parametros opcionales
 
@@ -158,3 +158,29 @@ async def read_items(
         results.update({"q": q})
     return results
 
+# Para hacer validaciones numericas es necesation importar Path desde fastapi
+# Path es analogo a Query que permite hacer validaciones pero esta ve para valores enteros
+# si nuestra url recibe varios parametro es importante que se ponga primero los parametros 
+# requeridos y luego los opcionales
+# tambien es importante que pongamos antes los que tienen un default definido que los que no lo tienen
+# * si el primer parametro es un asterisco entonces indicamos que la funcion recibe por parametro kwargs 
+# un tamaño de parametro indeterminado incluso si hay parametros sin default 
+
+# item_id: int = Path(..., title="The ID of the item to get", ge=1) en esta linea pedimos que item_id sea requerido y 
+# ademas debe cumplir que sea mayor o igual a 1 (greather or equal)
+# gt: greather than  #le: less or equal
+
+#  size: float = Query(..., gt=0, lt=10.5) esta linea requiere un valor float con las restricciones escritas dentro
+# notar que se usa Query y no path
+
+@app.get("/items/integerValidations/{item_id}/")
+async def read_items(
+    *, 
+    q: str, 
+    item_id: int = Path(..., title="The ID of the item to get", gt=0, le=1000),
+    size: float = Query(..., gt=0, lt=10.5)
+):
+    results = {"item_id": item_id}
+    if q:
+        results.update({"q": q})
+    return results
