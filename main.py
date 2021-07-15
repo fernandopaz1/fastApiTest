@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Query
 from pydantic import BaseModel
-from typing import Optional #para parametros opcionales
+from typing import Optional, List #para parametros opcionales
 
 app = FastAPI()
 
@@ -116,7 +116,8 @@ async def create_item(item_id: int, item: Item):
 # q: Optional[str] = Query("fixedquery", min_length=3) en este caso el valor por default es fixedquery
 # q: str es un valor requerido pero de esta forma no podemos hacer restricciones
 # q: str = Query(..., min_length=3) la forma de meter restricciones con query es poniendo ... en lugar del default
-@app.get("/items/")
+# Ejemplo de url que funciona http://127.0.0.1:8000/items/query/restringida/?q=fixedquery
+@app.get("/items/query/restringida/")
 async def read_items(
     q: Optional[str] = Query(None, min_length=3, max_length=50, regex="^fixedquery$")
 ):
@@ -125,3 +126,13 @@ async def read_items(
         results.update({"q": q})
     return results
 
+# Si la variable es una lista hay que importar la libreria List 
+# q: Optional[List[str]] = Query(None) decimos que q es opcional de tipo lista de string y su default es None
+# para pasarle parametros via url  hay que usar http://localhost:8000/items/listas/?q=foo&q=bar
+# q: List[str] = Query(["foo", "bar"]) aca es lo mismo que arriba pero definiendo el default como ["foo", "bar"]
+# q: list = Query([])  
+
+@app.get("/items/listas/")
+async def read_items(q: Optional[List[str]] = Query(["foo", "bar"])):
+    query_items = {"q": q}
+    return query_items
