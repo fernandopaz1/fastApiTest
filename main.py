@@ -1,6 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
-from typing import Optional #para parametros opcionales
+from typing import Optional, List #para parametros opcionales
 
 app = FastAPI()
 
@@ -106,4 +106,55 @@ async def create_item(item_id: int, item: Item):
 async def create_item(item_id: int, item: Item):
     return {"item_id": item_id, **item.dict()}
 
+
+
+# Podemos pasar parametros con valores default de la forma
+# q: Optional[str] = none   define que el valor de q es opciona y por default es none
+# q: Optiona[str] = Query(None) hace lo mimos pero permite agregar mas parametros
+#     q: Optional[str] = Query(None, min_length=3, max_length=50, regex="^fixedquery$") 
+# la ultima linea agrega restricciones de lognitud y un regex que debe cumplir
+# q: Optional[str] = Query("fixedquery", min_length=3) en este caso el valor por default es fixedquery
+# q: str es un valor requerido pero de esta forma no podemos hacer restricciones
+# q: str = Query(..., min_length=3) la forma de meter restricciones con query es poniendo ... en lugar del default
+# Ejemplo de url que funciona http://127.0.0.1:8000/items/query/restringida/?q=fixedquery
+@app.get("/items/query/restringida/")
+async def read_items(
+    q: Optional[str] = Query(None, min_length=3, max_length=50, regex="^fixedquery$")
+):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+# Si la variable es una lista hay que importar la libreria List 
+# q: Optional[List[str]] = Query(None) decimos que q es opcional de tipo lista de string y su default es None
+# para pasarle parametros via url  hay que usar http://localhost:8000/items/listas/?q=foo&q=bar
+# q: List[str] = Query(["foo", "bar"]) aca es lo mismo que arriba pero definiendo el default como ["foo", "bar"]
+# q: list = Query([])  
+
+@app.get("/items/listas/")
+async def read_items(q: Optional[List[str]] = Query(["foo", "bar"])):
+    query_items = {"q": q}
+    return query_items
+
+# a los parametros de la query se les puede agregar metadatos 
+# como titulo, description, si esta deprecado o no y un alias para la variable
+# en vez de tener que usar el parametro q pasamos ese alias a la url
+# la url indicada para este caso (con alias incluido ) es
+# http://127.0.0.1:8000/items/metadatos/?item-query=foobaritems
+@app.get("/items/metadatos/")
+async def read_items(
+    q: Optional[str] = Query(
+        None,
+        title="Query string",
+        description="Query string for the items to search in the database that have a good match",
+        min_length=3,
+        alias="item-query",
+        deprecated=True
+    )
+):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
 
