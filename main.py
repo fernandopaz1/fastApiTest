@@ -136,3 +136,25 @@ async def read_items(
 async def read_items(q: Optional[List[str]] = Query(["foo", "bar"])):
     query_items = {"q": q}
     return query_items
+
+# a los parametros de la query se les puede agregar metadatos 
+# como titulo, description, si esta deprecado o no y un alias para la variable
+# en vez de tener que usar el parametro q pasamos ese alias a la url
+# la url indicada para este caso (con alias incluido ) es
+# http://127.0.0.1:8000/items/metadatos/?item-query=foobaritems
+@app.get("/items/metadatos/")
+async def read_items(
+    q: Optional[str] = Query(
+        None,
+        title="Query string",
+        description="Query string for the items to search in the database that have a good match",
+        min_length=3,
+        alias="item-query",
+        deprecated=True
+    )
+):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
