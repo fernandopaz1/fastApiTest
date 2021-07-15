@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 from typing import Optional #para parametros opcionales
 
@@ -106,4 +106,22 @@ async def create_item(item_id: int, item: Item):
 async def create_item(item_id: int, item: Item):
     return {"item_id": item_id, **item.dict()}
 
+
+
+# Podemos pasar parametros con valores default de la forma
+# q: Optional[str] = none   define que el valor de q es opciona y por default es none
+# q: Optiona[str] = Query(None) hace lo mimos pero permite agregar mas parametros
+#     q: Optional[str] = Query(None, min_length=3, max_length=50, regex="^fixedquery$") 
+# la ultima linea agrega restricciones de lognitud y un regex que debe cumplir
+# q: Optional[str] = Query("fixedquery", min_length=3) en este caso el valor por default es fixedquery
+# q: str es un valor requerido pero de esta forma no podemos hacer restricciones
+# q: str = Query(..., min_length=3) la forma de meter restricciones con query es poniendo ... en lugar del default
+@app.get("/items/")
+async def read_items(
+    q: Optional[str] = Query(None, min_length=3, max_length=50, regex="^fixedquery$")
+):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
 
